@@ -1,0 +1,7 @@
+# Declaring this from package.json's dsh.bundle.patch is what makes the package
+# a profile layer. Without it the package installs cleanly, exits 0, and never
+# appears in the composed tree.
+
+- insert:
+    - id: minecraft
+      name: 'dsh-minecraft'

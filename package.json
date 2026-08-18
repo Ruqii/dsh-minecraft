@@ -1,0 +1,36 @@
+{
+  "name": "dsh-minecraft",
+  "version": "0.1.0",
+  "description": "Play Minecraft from DeepSeek Harness: the agent observes, moves, mines and crafts through tools backed by a live Mineflayer bot",
+  "type": "module",
+  "main": "lib/index.js",
+  "files": [
+    "lib/**/*.js",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "dependencies": {
+    "mineflayer": "^4.37.1",
+    "mineflayer-pathfinder": "^2.4.5",
+    "vec3": "^0.1.10"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-tools": "^0.0.1-rc.1"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "minecraft",
+    "mineflayer"
+  ],
+  "license": "MIT"
+}
