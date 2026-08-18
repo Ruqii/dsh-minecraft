@@ -132,6 +132,27 @@ settled by reading `node_modules/mineflayer/lib/plugins/`, not by trying them.
 | `bot.recipesAll(id, meta, table)` | Filters only on `!recipe.requiresTable \|\| craftingTable`, so passing a **truthy placeholder** returns every recipe. That is the discriminator separating "no such recipe" / "needs a table" / "short of materials" — three states that look identical from an empty `recipesFor`. |
 | `bot.placeBlock` | Waits 5s for a `blockUpdate` and **throws even when the server placed the block**. Propagating that exception tells the agent the table is missing while it stands next to it — the same plausible-but-wrong class as the `run_id` bug. `mc_place` catches it and re-reads `bot.blockAt(target)`. |
 
+## The world has to be reset between runs, not just the inventory
+
+Found while verifying, and it is a **board** requirement rather than a plugin
+one.
+
+Clearing `world/playerdata/<uuid>.dat` gives a fresh spawn with an empty
+inventory — and leaves everything the previous run built. A verification run
+started clean, needed a crafting table, and found two of them 12 metres away:
+
+```
+crafting_table at -4, 68, -6 (12.2m)    crafting_table at -6, 67, -6 (13.7m)
+```
+
+Both placed by the previous run's agent. On a live board that means entrant N
+inherits entrant N-1's crafting tables, felled trees and mine shafts — and the
+later an entrant runs, the easier the task gets. Scores would not be
+comparable and the drift would be invisible in the results.
+
+A scoring run needs a **fresh world directory** (the seed is fixed, so it
+regenerates identically), not a cleared player file.
+
 ## Environment facts that cost time to rediscover
 
 | | |
@@ -150,6 +171,29 @@ grades. `dsh-trapstreet` sits under the org for the opposite reason: it is a
 client of the platform, not a competitor on it.
 
 npm name `dsh-minecraft` is unclaimed and not yet published.
+
+## A tool that never returns is worse than one that fails
+
+`pathfinder.goto` takes no timeout. `thinkTimeout` bounds the A* search, not
+the walking, so a bot that cannot quite reach its goal keeps trying forever.
+
+Measured: an agent walked toward a crafting table three blocks above it, stopped
+moving entirely, and stood on the same coordinate for **ten minutes** until the
+run was killed. No error, no log line, nothing for the agent to react to — the
+tool call simply never came back and the run budget drained.
+
+`walkTo` now races the walk against a 60s ceiling and calls `pathfinder.stop()`
+on expiry, reporting where the bot actually ended up. Drop collection inside
+`mc_dig` uses the same helper at 15s: fetching an item four metres away should
+never be what consumes a run.
+
+Verified both directions, because a broken race would never fire and would look
+exactly like the bug:
+
+```
+unreachable target -> reached:false after 60s, "gave up after 60s without arriving"
+short walk         -> reached:true  after 1s
+```
 
 ## Known next defect: `mc_dig` mis-diagnoses a missing tool
 
