@@ -213,16 +213,48 @@ disabled movement for the rest of the run — worse than the hang it replaced.
 `clearPathing` burns the flag against a null goal first; verified by walking
 successfully twice in a row immediately after a timeout.
 
-## Known next defect: `mc_dig` mis-diagnoses a missing tool
+## Step 3 reached: `mc_equip`, and three defects it uncovered
 
-Stone mined bare-handed drops nothing. `mc_dig` then walks onto the block,
-still gains nothing, and reports *"the drop may be out of reach"* — the wrong
-cause, and it is the first thing an agent hits on the stone-pickaxe step.
+`mineflayer`'s `digging.js` contains no equip logic at all — `bot.dig` uses
+whatever is in hand — so a pickaxe in the inventory did nothing. `mc_equip`
+holds a **named** item; it never picks one, because choosing the right tool is
+the decision the board measures. `mc_dig` still equips nothing.
 
-The fix is to check `target.harvestTools` against the held item and say so.
+Verified: `dug stone -> 1 x cobblestone`.
 
-It was originally deferred on the grounds that `mc_dig` was a passing control
-and should not be changed while new variables were being added. **That reason
-has expired** — `mc_dig`'s tail has since been rewritten twice, for drop
-collection and for the walk ceiling. There is no control left to protect, so
-this is simply the next thing to fix.
+Three things surfaced on the way, each of which returned a normal-looking value.
+
+**Walking silently unequips.** Pathfinder bridges gaps by placing blocks, which
+puts the block in hand. Measured: equip a wooden pickaxe, walk, dig — and the
+bot is holding dirt, so the stone drops nothing. Walking is not a statement
+about what to hold, so `walkTo` now restores the previously held item.
+
+**`items_gained` counted the wrong thing.** It measured total inventory change,
+not whether *this block's* drop arrived. With clutter on the floor — pathfinder
+digs dirt to reach a spot, the bot steps on a stray dirt item — the total rose
+by one and a cobblestone lying on the ground was recorded as collected. `dig`
+now reads `block.drops` (`stone.drops -> cobblestone`) and counts only that,
+reporting `1 x cobblestone` rather than a bare number. This defect was present
+from the first version and stayed invisible while the ground happened to be
+clean.
+
+**`canDigBlock` says nothing about tools.** It checks reach (≤5.1 from the eyes)
+and diggability only — read from `digging.js`. The old message offered "or you
+may need a better tool", which sends the agent to fix the wrong thing.
+
+`mc_dig` also names the real cause now when the held item cannot harvest:
+
+```
+stone dropped nothing because you were holding nothing. It only drops for:
+wooden_pickaxe, stone_pickaxe, golden_pickaxe, iron_pickaxe, ... The block is
+gone either way.
+```
+
+It does **not** refuse the dig. Breaking stone bare-handed destroys it in the
+real game too; refusing would change the rules and cover for a decision that is
+the agent's to make.
+
+## Still missing for the diamond board
+
+`mc_smelt` (furnace, for iron ingots), the mp4 recording the task requires,
+`difficulty=easy` instead of `peaceful`, and a fresh world per run.
