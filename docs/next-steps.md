@@ -332,18 +332,25 @@ the frames were muxed afterwards by the harness, and `outcome.json` still said
 exactly that before patching it. **Filling `video` in after muxing is the run
 script's job and is not optional.**
 
-**The camera never follows the bot.** The video is 478s of real frames, but
-every one of them looks down on the spawn forest — the agent was at y=-35
-mining deepslate for the second half and none of it is on film. Sampling frame
-hashes suggests movement, which is misleading: the pixels change only because
-water and foliage animate. The video passes the judge's non-empty check and is
-worthless as the credibility evidence the board actually wants it for.
+**The camera pointed at the wrong place.** The video was 478s of real frames
+that all looked down on the spawn forest while the agent spent the second half
+at y=-35. The third-person camera the reference solution uses *does* follow
+horizontally -- verified by walking a bot 60 blocks and watching the view
+change -- but it sits behind and above, which shows nothing underground, where
+the part worth filming happens.
 
-The reference implementation's own recording does follow the bot, so this is an
-integration fault rather than a limitation. The likely difference is that
-`mineflayerViewer` is started inside `connect()` the moment the bot spawns,
-where the reference waits for the world to be ready first. **Not yet
-diagnosed.**
+Fixed by recording in **first person**. Re-verified with a full rerun:
+
+```
+score 1.0 · diamond x5 · video_declared True
+ticks 21337 / 36000 · wall 1133s / 1800s
+60 MB, 1073s of video over an 1133s run
+```
+
+Frames pulled from the middle show a cave interior at eye level with copper ore
+in the wall — the run is now actually on film. Some blocks render as
+missing-texture placeholders, which is a prismarine-viewer texture gap and
+cosmetic.
 
 ## Still missing for the diamond board
 
