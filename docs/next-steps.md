@@ -191,9 +191,27 @@ Verified both directions, because a broken race would never fire and would look
 exactly like the bug:
 
 ```
-unreachable target -> reached:false after 60s, "gave up after 60s without arriving"
+unreachable target -> reached:false, timed_out:true, after 60s
 short walk         -> reached:true  after 1s
 ```
+
+Two further defects came out of writing that ceiling, and neither would have
+been visible without probing it:
+
+**Cut short is not the same as cannot get there.** The first version returned
+`reached:false` for both, which are opposite situations — one means walk again,
+the other means pick another target. `walkTo` now returns `timed_out` and
+measures whether the distance actually closed.
+
+**`pathfinder.stop()` poisons the next walk.** It sets an internal
+`stopPathing` flag cleared only when the bot reaches the next node of a path —
+and a bot that was just stopped has no path, so the flag stays set. The
+following `setGoal` runs `resetPath`, sees the flag, and nulls the goal that
+was just assigned. Measured: after one timed-out walk, a four-block walk in the
+same session covered **0.2m in sixty seconds**. So a single timeout would have
+disabled movement for the rest of the run — worse than the hang it replaced.
+`clearPathing` burns the flag against a null goal first; verified by walking
+successfully twice in a row immediately after a timeout.
 
 ## Known next defect: `mc_dig` mis-diagnoses a missing tool
 
@@ -202,6 +220,9 @@ still gains nothing, and reports *"the drop may be out of reach"* — the wrong
 cause, and it is the first thing an agent hits on the stone-pickaxe step.
 
 The fix is to check `target.harvestTools` against the held item and say so.
-Deliberately **not** done in the same change as `mc_craft`/`mc_place`: `mc_dig`
-currently passes, and changing a passing control while adding new variables is
-exactly the mistake that cost half a day on the `dsh-trapstreet` transport bug.
+
+It was originally deferred on the grounds that `mc_dig` was a passing control
+and should not be changed while new variables were being added. **That reason
+has expired** — `mc_dig`'s tail has since been rewritten twice, for drop
+collection and for the walk ceiling. There is no control left to protect, so
+this is simply the next thing to fix.
