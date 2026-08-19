@@ -1,6 +1,6 @@
 {
   "name": "dsh-minecraft",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "Play Minecraft from DeepSeek Harness: the agent observes, moves, mines and crafts through tools backed by a live Mineflayer bot",
   "type": "module",
   "main": "lib/index.js",

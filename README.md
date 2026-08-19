@@ -138,6 +138,22 @@ which is what happens to most timed runs.
 | `MC_SEED` | Recorded into `outcome.json`; the plugin cannot read the server's seed. |
 | `CHROME_PATH` | Defaults to the macOS Google Chrome path. |
 | `MC_VIEW` | `off` disables the live view. |
+| `MC_ONE_LIFE` | `1` ends the run at the first death — see below. |
+
+### One life
+
+The [`one_life`](https://github.com/Ruqii/minecraft-one-life) board scores the
+rung reached before the first death. Minecraft does not stop when you die — you
+respawn on the spot — so without help that rule is only a scoring convention and
+an agent can grind to a diamond on its second life.
+
+`MC_ONE_LIFE=1` makes it real. After the first death every action tool refuses
+with what had been reached, `mc_observe` still works so the agent can see what
+happened, and the outcome carries `deaths` and `milestones_at_death` recorded at
+the moment it occurred rather than remembered afterwards.
+
+Like recording, it is **not a tool**: whether a run is over is not one of the
+agent's decisions.
 
 Recording is **not a tool**: being filmed is not one of the agent's decisions.
 
