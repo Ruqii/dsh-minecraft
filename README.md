@@ -8,7 +8,7 @@ walks, and mines through tools.
 dsh plugin --profile <name> add dsh-minecraft
 ```
 
-## Ten tools
+## Twelve tools
 
 | Tool | What it does |
 |---|---|
@@ -21,6 +21,8 @@ dsh plugin --profile <name> add dsh-minecraft
 | `mc_place` | Put a block from the inventory into the world. |
 | `mc_equip` | Hold a named item — digging uses whatever is in hand. |
 | `mc_smelt` | Smelt in a furnace that is already standing, with a fuel you name. |
+| `mc_attack` | Swing at the nearest entity of a kind, within melee reach. |
+| `mc_eat` | Eat a carried food item, then put back what was held. |
 | `mc_disconnect` | Leave, and finish the recording. |
 
 Given one sentence — *obtain an iron pickaxe* — an agent works out planks,
