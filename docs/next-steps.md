@@ -287,7 +287,33 @@ h264  1280x720  6.2s  371 KB  62 frames
 and a frame pulled out of the middle shows the world and the bot, not the black
 screen that a missing GL backend produces.
 
+## The outcome JSON, and where it has to be printed
+
+`judge.py` reads a single JSON object from the **last line of the run's
+stdout**. A DSH plugin does not control that — the agent's stdout belongs to the
+harness — so the plugin writes `outcome.json` next to the video and the
+submission's `run.sh` prints it. That split is structural, not a shortcut.
+
+`milestones` records every item held **at any point** in the run, not the
+closing inventory. A wooden pickaxe wears out and raw iron gets smelted away;
+the judge credits a rung on either the milestone list or the inventory, and the
+honest version of that list is what actually passed through the bot's hands.
+
+Verified by running the task's own judge over what the plugin wrote:
+
+```
+score              0.2
+highest_milestone  wooden_pickaxe
+video_declared     True
+ticks              953      wall_time_s  49
+```
+
+**`video` is written as a local file path.** The judge only checks the field is
+non-empty, so a local path scores — and is no use to anyone trying to check the
+run. It has to be replaced with a public URL before submitting.
+
 ## Still missing for the diamond board
 
-`difficulty=easy` instead of `peaceful`, a fresh world per run, and the outcome
-JSON the judge reads (`seed`, `mc_version`, `video`, `ticks`, `wall_time_s`).
+`difficulty=easy` instead of `peaceful`, a fresh world per run, uploading the
+mp4 somewhere public, and a `run.sh` that prints `outcome.json` as its last
+line.
