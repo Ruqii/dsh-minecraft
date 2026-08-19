@@ -91,50 +91,55 @@ since you last looked: health 14, food 20
 Without that line the agent walks for a minute, arrives on 14 health, and has
 no idea why.
 
-## Recording
+## Watching it play
 
-The evaluation board this exists for scores a run with no video at **0.0**,
-however far it got. So recording is built in — and deliberately **not a tool**.
-Being filmed is not one of the agent's decisions.
+This is on by default. Connect, and the bot reports a link:
 
 ```
-MC_RECORD_DIR=/somewhere  dsh --profile <name> "...play..."
+watch live at http://localhost:3017
 ```
 
-prismarine-viewer serves a third-person view, headless Chrome renders it with
-SwiftShader software WebGL, frames are screencast to disk, and ffmpeg muxes
-them at `mc_disconnect`. `outcome.json` is written **continuously**, so a run
-killed at its time limit still leaves both a frames directory and a report —
-which is what actually happens to most timed runs.
+Open it and you are looking through the bot's eyes while it plays. No
+configuration, no file, no ffmpeg. `MC_VIEW=off` turns it off; the port moves up
+from 3017 if something else has it.
 
-| Variable | Effect |
-|---|---|
-| `MC_RECORD_DIR` | Where to write `frames/`, `run.mp4` and `outcome.json`. Unset means no recording. |
-| `MC_SEED` | Recorded into `outcome.json`; the plugin cannot read the server's seed. |
-| `CHROME_PATH` | Defaults to the macOS Google Chrome path. |
-| `MC_RECORD_FPS` | Default 10. |
+### It builds its own native module
 
-### The one trap: `canvas` installs without building
-
-prismarine-viewer pulls in `canvas`, a native module, and **a DSH profile
-installs plugin dependencies without running install scripts**. The package
-arrives complete except for the one file that matters:
+prismarine-viewer needs `canvas`, and **a DSH profile installs plugin
+dependencies without running install scripts** — so the package arrives complete
+except for the one binary that matters:
 
 ```
 Cannot find module '../build/Release/canvas.node'
 ```
 
-Recording then declines, the run plays perfectly, and the result is worth
-nothing. The plugin says so by name; the fix is one line:
+Earlier versions printed that, told you to run `npm rebuild canvas`, and gave
+up. Telling someone to run a command the code could run itself, for a feature
+they asked for, is a bug with instructions attached — so it runs it. Takes about
+three seconds, once, and says `(built the canvas module first)` when it does.
+
+## Recording an mp4
+
+Watching is enough for a person. The evaluation board wants a file, and scores
+a run with no video at **0.0** however far it got.
 
 ```
-npm rebuild canvas      # inside <DSH_HOME>/profiles/<name>/node_modules/canvas
+MC_RECORD_DIR=/somewhere  dsh --profile <name> "...play..."
 ```
 
-Put it in your run script, after installing the plugin and before playing.
-Every recording dependency is optional and lazily imported, so a machine
-without Chrome still gets a fully working plugin — it just reports why it
-cannot film and plays on.
+Frames are screencast from the same live view through headless Chrome and muxed
+by ffmpeg at `mc_disconnect`. `outcome.json` is written **continuously**, so a
+run killed at its time limit still leaves both a frames directory and a report —
+which is what happens to most timed runs.
+
+| Variable | Effect |
+|---|---|
+| `MC_RECORD_DIR` | Where to write `frames/`, `run.mp4` and `outcome.json`. Unset means live-view only. |
+| `MC_SEED` | Recorded into `outcome.json`; the plugin cannot read the server's seed. |
+| `CHROME_PATH` | Defaults to the macOS Google Chrome path. |
+| `MC_VIEW` | `off` disables the live view. |
+
+Recording is **not a tool**: being filmed is not one of the agent's decisions.
 
 ## Requirements
 
