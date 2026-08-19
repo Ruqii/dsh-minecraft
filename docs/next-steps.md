@@ -254,7 +254,40 @@ It does **not** refuse the dig. Breaking stone bare-handed destroys it in the
 real game too; refusing would change the rules and cover for a decision that is
 the agent's to make.
 
+## Recording, which the board scores harder than anything else
+
+Read from the task's own rules: **no video means 0.0**, however far the run
+got. The ladder is wooden `0.2` · stone `0.4` · iron ingot `0.6` · iron pickaxe
+`0.8` · diamond `1.0` — so everything built so far is worth nothing without an
+mp4.
+
+The pipeline is the one already proven in the reference solution repo
+(`mindcraft-forMC/record.js`): prismarine-viewer serves a third-person view of
+the bot, headless Chrome renders it with **software WebGL** — SwiftShader,
+because headless Chrome on arm64 has no usable hardware GL and the page
+otherwise renders black — CDP screencasts frames to disk, ffmpeg muxes at the
+end.
+
+It is deliberately **not a tool**. Being filmed is not one of the agent's
+decisions, so it is switched on by `MC_RECORD_DIR` at connect and finalised at
+disconnect. `mc_record_start` would hand the agent a choice that is not part of
+playing.
+
+Every dependency is optional and lazily imported, so a machine without Chrome
+still gets a working plugin — it notes why it cannot film and plays on. That
+path was exercised for real: the first attempt failed on a missing native
+`canvas`, was reported in the journal, and the run continued.
+
+Verified to an actual file rather than a return value:
+
+```
+h264  1280x720  6.2s  371 KB  62 frames
+```
+
+and a frame pulled out of the middle shows the world and the bot, not the black
+screen that a missing GL backend produces.
+
 ## Still missing for the diamond board
 
-`mc_smelt` (furnace, for iron ingots), the mp4 recording the task requires,
-`difficulty=easy` instead of `peaceful`, and a fresh world per run.
+`difficulty=easy` instead of `peaceful`, a fresh world per run, and the outcome
+JSON the judge reads (`seed`, `mc_version`, `video`, `ticks`, `wall_time_s`).
