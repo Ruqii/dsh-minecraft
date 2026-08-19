@@ -312,6 +312,39 @@ ticks              953      wall_time_s  49
 non-empty, so a local path scores — and is no use to anyone trying to check the
 run. It has to be replaced with a public URL before submitting.
 
+## The run that scored 1.0, and the two things still wrong with it
+
+On `peaceful`, one sentence — *obtain a diamond* — produced **4 diamonds in 738
+seconds** (14751 ticks, both well inside the 30-minute / 36000-tick limits). The
+task's own judge scores it:
+
+```
+score 1.0 · highest_milestone diamond · goal_met True · video_declared True
+```
+
+Two defects showed up only because the whole pipeline ran end to end.
+
+**An empty `video` field turned a diamond into a 0.0.** The plugin writes
+`outcome.json` continuously so a killed run still reports, but a partial write
+cannot name an mp4 that does not exist yet. The run was killed at its ceiling,
+the frames were muxed afterwards by the harness, and `outcome.json` still said
+`video: ""` — which the judge scores 0.0 no matter what was achieved. Measured
+exactly that before patching it. **Filling `video` in after muxing is the run
+script's job and is not optional.**
+
+**The camera never follows the bot.** The video is 478s of real frames, but
+every one of them looks down on the spawn forest — the agent was at y=-35
+mining deepslate for the second half and none of it is on film. Sampling frame
+hashes suggests movement, which is misleading: the pixels change only because
+water and foliage animate. The video passes the judge's non-empty check and is
+worthless as the credibility evidence the board actually wants it for.
+
+The reference implementation's own recording does follow the bot, so this is an
+integration fault rather than a limitation. The likely difference is that
+`mineflayerViewer` is started inside `connect()` the moment the bot spawns,
+where the reference waits for the world to be ready first. **Not yet
+diagnosed.**
+
 ## Still missing for the diamond board
 
 `difficulty=easy` instead of `peaceful`, a fresh world per run, uploading the
