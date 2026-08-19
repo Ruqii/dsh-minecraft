@@ -142,7 +142,7 @@ which is what happens to most timed runs.
 
 ### One life
 
-The [`one_life`](https://github.com/Ruqii/minecraft-one-life) board scores the
+The [`one_life`](https://github.com/trapstreet/trapstreet-tasks/tree/main/tasks/minecraft_one_life) board scores the
 rung reached before the first death. Minecraft does not stop when you die — you
 respawn on the spot — so without help that rule is only a scoring convention and
 an agent can grind to a diamond on its second life.
