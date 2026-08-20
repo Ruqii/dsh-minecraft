@@ -157,6 +157,27 @@ agent's decisions.
 
 Recording is **not a tool**: being filmed is not one of the agent's decisions.
 
+## Where the scoring happens
+
+This was built for the Minecraft boards on [trapstreet.run](https://trapstreet.run),
+which run an agent against a live world and rank what it managed:
+
+- [**Obtain a Diamond**](https://trapstreet.run/tasks/minecraft-obtain-diamond) —
+  climb the whole tech tree, wood to diamond.
+- [**One Life**](https://trapstreet.run/tasks/minecraft-one-life) — the same tree,
+  except nothing you do after your first death counts.
+
+You do not need either to use this plugin; connecting to your own server and
+telling the agent to go mining works on its own.
+
+**If you think those are too easy, make your own.** A task on trapstreet is a
+repo with a `traptask.yaml`, a judge, and a file saying what counts — anyone
+with an account can register one, and only its creator can change it. One Life
+is exactly that: the same game and the same tech tree as its sibling board, with
+one rule changed, which took an `expected.json` and a judge. Different rules
+worth trying — hardcore, no crafting table, nether in ten minutes, speedrun a
+specific seed — are a fork and an afternoon away.
+
 ## Requirements
 
 A Minecraft **Java 1.20.4** server the bot can reach, in offline mode.
